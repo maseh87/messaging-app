@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Mason's Chatbuilder</title>
+    <script src="http://chatbuilder.hackreactor.com/ChatBuilder.js"></script>
+  </head>
+  <body>
+
+    <script>
+
+      Chat.guide.start();
+
+      // delete Chat.display;
+      // delete Chat.fetch;
+      // delete Chat.send;
+
+        $('document').ready(function() {
+          //On click send the input to the server
+          $('.send').click(function(e) {
+            e.preventDefault();
+            var inputs = $('.draft').val();
+            if(inputs) {
+              snd(Chat.username + ': ' + inputs);
+            }
+          //Reset input box to blank after the chat is sent
+            $('.draft').val('');
+          });
+          //Every 3 seconds display chats
+          setInterval(function() {
+            ftch(function(data){
+              $('ul').empty();
+              var chatArray = data.results;
+              for(var i = 0; i < chatArray.length; i++) {
+                dsplay(chatArray[i].text);
+              }
+            });
+          }, 3000);
+
+        });
+
+        // Chat.display
+        var dsplay = function(str) {
+            if(typeof str === 'string') {
+            var li = $('<li>');
+            li.html(str);
+            $(li).prependTo('ul');
+          }
+        };
+        //Chat.fetch
+        var ftch = function(cb) {
+          $.ajax({
+            url: 'https://api.parse.com/1/classes/chats?order=-createdAt',
+            type: 'GET',
+            success: cb,
+            error: function(err) {
+              console.log('GET request error', error);
+            }
+          });
+        };
+
+        //Chat.send
+        var snd = function(string) {
+          $.ajax({
+            url: 'https://api.parse.com/1/classes/chats',
+            type: 'POST',
+            data: JSON.stringify({ text: string }),
+            success: function() {
+              console.log('POST success');
+            },
+            error: function(err) {
+              console.log('POST request error', err);
+            }
+          });
+        };
+
+        console.log('Hey it\'s Mason, tell me what you think!');
+    </script>
+
+    <h2>Non-Broken Chat</h2>
+
+    <input class="draft" type="text" placeholder='Chat goes here'/> <button class="send">Send</button>
+
+    <ul class="messages">
+
+    </ul>
+
+  </body>
+</html>
